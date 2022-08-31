@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MyAmdavadiApp</string>
+
+    <string name="txt_categories">Categories</string>
+    <string name="txt_recommendations">Recommendations</string>
+    <string name="txt_details">Details</string>
+    <string name="back_button">Back Button</string>
+</resources>
