@@ -21,9 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myamdavadiapp.data.DataSource
 import com.example.myamdavadiapp.data.models.Recommendation
+import com.example.myamdavadiapp.utils.AppContentType
 
 @Composable
-fun RecommendationDetailScreen(selectedOptionId: Int, modifier: Modifier = Modifier) {
+fun RecommendationDetailScreen(
+    selectedOptionId: Int,
+    contentType: AppContentType,
+    modifier: Modifier = Modifier
+) {
     val selectedOption: Recommendation? =
         DataSource.recommendations.find { it.optionId == selectedOptionId }
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {

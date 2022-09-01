@@ -1,10 +1,14 @@
 package com.example.myamdavadiapp.ui
 
+import android.util.Log
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.myamdavadiapp.R
+import com.example.myamdavadiapp.utils.AppContentType
 
 enum class AppScreens(@StringRes val title: Int) {
     Category(R.string.txt_categories),
@@ -47,16 +52,34 @@ fun MyCityAppBar(
 }
 
 @Composable
-fun MyCityApp(modifier: Modifier = Modifier) {
+fun MyCityApp(windowSize: WindowWidthSizeClass, modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = AppScreens.valueOf(
         backStackEntry?.destination?.route ?: AppScreens.Category.name
     )
     val viewModel: CityViewModel = viewModel()
+    val contentType: AppContentType
+    when (windowSize) {
+        WindowWidthSizeClass.Compact -> {
+            Log.d("TAG", "MyCityApp: Compact Screen")
+            contentType = AppContentType.LIST_ONLY
+        }
+        WindowWidthSizeClass.Medium -> {
+            Log.d("TAG", "MyCityApp: Medium Screen")
+            contentType = AppContentType.LIST_ONLY
+        }
+        WindowWidthSizeClass.Expanded -> {
+            Log.d("TAG", "MyCityApp: Expanded Screen")
+            contentType = AppContentType.LIST_AND_DETAIL
+        }
+        else -> {
+            Log.d("TAG", "MyCityApp: Else Screen")
+            contentType = AppContentType.LIST_ONLY
+        }
+    }
 
     Scaffold(
-
         topBar = {
             MyCityAppBar(
                 currentScreenTitle = currentScreen.title,
@@ -75,22 +98,61 @@ fun MyCityApp(modifier: Modifier = Modifier) {
             modifier = modifier.padding(innerPadding),
         ) {
             composable(route = AppScreens.Category.name) {
-                CategoryListScreen {
+                CategoryListScreen(contentType) {
                     viewModel.setCategoryId(it)
                     navController.navigate(AppScreens.Recommendation.name)
                 }
             }
 
             composable(route = AppScreens.Recommendation.name) {
-                RecommendationsListScreen(selectedCategoryId) {
-                    viewModel.setOptionId(it)
-                    navController.navigate(AppScreens.Detail.name)
+                if (contentType == AppContentType.LIST_AND_DETAIL) {
+                    RecommendationListWithDetailScreen(
+                        selectedCategoryId,
+                        contentType,
+                        1
+                    ) {
+                        viewModel.setOptionId(it)
+                        navController.navigate(AppScreens.Detail.name)
+                    }
+                } else {
+                    RecommendationsListScreen(selectedCategoryId, contentType) {
+                        viewModel.setOptionId(it)
+                        navController.navigate(AppScreens.Detail.name)
+                    }
                 }
             }
 
             composable(route = AppScreens.Detail.name) {
-                RecommendationDetailScreen(selectedOptionId)
+                if (contentType == AppContentType.LIST_AND_DETAIL) {
+                    RecommendationListWithDetailScreen(
+                        selectedCategoryId,
+                        contentType,
+                        selectedOptionId
+                    ) {
+                        viewModel.setOptionId(it)
+                        navController.navigate(AppScreens.Detail.name)
+                    }
+                } else {
+                    RecommendationDetailScreen(selectedOptionId, contentType)
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun RecommendationListWithDetailScreen(
+    selectedCategoryId: Int,
+    contentType: AppContentType,
+    selectedOptionId: Int,
+    onListItemClicked: (Int) -> Unit
+) {
+    Row {
+        Box(modifier = Modifier.weight(1f)) {
+            RecommendationsListScreen(selectedCategoryId, contentType) { onListItemClicked(it) }
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            RecommendationDetailScreen(selectedOptionId, contentType)
         }
     }
 }

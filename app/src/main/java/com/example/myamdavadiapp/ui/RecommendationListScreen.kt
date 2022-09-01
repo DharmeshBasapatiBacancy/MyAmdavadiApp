@@ -20,10 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myamdavadiapp.data.DataSource
 import com.example.myamdavadiapp.data.models.Recommendation
+import com.example.myamdavadiapp.utils.AppContentType
 
 @Composable
 fun RecommendationsListScreen(
-    selectedCategoryId: Int, modifier: Modifier = Modifier,
+    selectedCategoryId: Int,contentType: AppContentType, modifier: Modifier = Modifier,
     onItemClick: (Int) -> Unit
 ) {
     LazyColumn(modifier = modifier.padding(4.dp)) {
